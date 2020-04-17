@@ -1,0 +1,28 @@
+{
+  "name": "rn-sliding-button-panel",
+  "version": "1.0.0",
+  "description": "A side panel for React-Native with a button to slide and show/hide the panel at the side of the screen ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gauravongit/rn-sliding-button-panel.git"
+  },
+  "keywords": [
+    "react-native side panel",
+    "native",
+    "side",
+    "panel"
+  ],
+  "author": "Gaurav Chaudhary",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gauravongit/rn-sliding-button-panel/issues"
+  },
+  "homepage": "https://github.com/gauravongit/rn-sliding-button-panel#readme",
+  "dependencies": {
+    "user": "0.0.0"
+  }
+}
