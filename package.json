@@ -1,6 +1,6 @@
 {
   "name": "rn-sliding-button-panel",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A side panel for React-Native with a button to slide and show/hide the panel at the side of the screen ",
   "main": "index.js",
   "scripts": {
