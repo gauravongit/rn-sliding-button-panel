@@ -1,11 +1,5 @@
 import React, {useState} from 'react';
-import {
-  Animated,
-  View,
-  Platform,
-  Easing,
-  I18nManager,
-} from 'react-native';
+import {Animated, View, Platform, Easing, I18nManager} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import styles from './styles';
@@ -17,28 +11,31 @@ const SlideButtonPanel = ({
   width = 70,
   height,
   buttons = [{}],
-  hideBorder = true,
-  showBtnIconAnimation = true,
-  stopOpenBtnAnimation = true,
+  btnSeparator = true,
+  btnIconsAnimation = true,
+  panelBackgroundColor,
+  openBtnBackgroundColor,
+  btnSeparatorColor = 'gray',
 }) => {
   const initialPosition = isRTL() ? -width : width;
   const [position] = useState(new Animated.Value(initialPosition));
-  const [openBtnIconScale] = useState(new Animated.Value(-1));
+  const [openBtnIconScale] = useState(new Animated.Value(isRTL() ? 1 : -1));
   const [actionBtnIconSpin] = useState(new Animated.Value(1));
   const [opened, setOpened] = useState(false);
   const [panelOpenBtnClicked, setPanelOpenBtnClicked] = useState(false);
 
   const onOpen = () => {
+    const toValue = opened ? -1 : 1;
     setOpened(!opened);
     Animated.timing(openBtnIconScale, {
-      toValue: opened ? -1 : 1,
+      toValue: isRTL() ? -toValue : toValue,
       duration: 500,
       useNativeDriver: true,
     }).start();
   };
 
   const actionBtnIconsAnimationStart = () => {
-    showBtnIconAnimation &&
+    btnIconsAnimation &&
       Animated.spring(actionBtnIconSpin, {
         toValue: opened ? 1 : 0,
         bounciness: 16,
@@ -77,14 +74,9 @@ const SlideButtonPanel = ({
     right: isIOS() ? width : panelOpenBtnClicked ? width : 0,
   };
 
+  const openBtnBackgroundColorStyle = {backgroundColor: openBtnBackgroundColor};
   const renderOpenPanelButton = () => {
-    const animateIconX = stopOpenBtnAnimation
-      ? isRTL()
-        ? -1
-        : 1
-      : isRTL()
-      ? -openBtnIconScale
-      : openBtnIconScale;
+    const animateIconX = openBtnIconScale;
     return (
       <Animated.View
         onStartShouldSetResponder={onStartShouldSetResponder}
@@ -93,7 +85,7 @@ const SlideButtonPanel = ({
           styles.openPanelBtnView,
           marginTopForOpenPanelBtn,
           alignmentOpenPanelBtn,
-          {width: 50, height: 90},
+          openBtnBackgroundColorStyle,
         ]}>
         <Animated.View style={{transform: [{scaleX: animateIconX}]}}>
           <Icon name="play" size={12} color={'gray'} />
@@ -104,15 +96,28 @@ const SlideButtonPanel = ({
 
   const renderPanelButton = (item, index) => {
     const showBorderForButton = {
-      borderBottomWidth: hideBorder ? 0 : index === buttons.length - 1 ? 0 : 2,
+      borderBottomWidth: btnSeparator
+        ? index === buttons.length - 1
+          ? 0
+          : 2
+        : 0,
+      borderBottomColor: btnSeparatorColor,
     };
-    const {onPress = () => {}, uri = ''} = item;
+    const {
+      onPress = () => {},
+      uri = '',
+      iconWidth = 36,
+      iconHeight = 36,
+    } = item;
+    const dynamicHeight = {height: height > 100 ? height / buttons.length : 90};
+    const iconDimension = {width: iconWidth, height: iconHeight};
     return (
       <TouchableWithoutFeedback onPress={onPress}>
-        <View style={[styles.panelBtnView, showBorderForButton]}>
+        <View style={[styles.panelBtnView, showBorderForButton, dynamicHeight]}>
           <Animated.Image
             style={[
               styles.panelBtnicon,
+              iconDimension,
               {transform: [{rotate: iconSpinRotation}]},
             ]}
             source={{uri: uri}}
@@ -122,19 +127,20 @@ const SlideButtonPanel = ({
     );
   };
 
+  const panelBackgroundColorStyle = {backgroundColor: panelBackgroundColor};
+
   const renderHiddenPanel = () => {
     return (
       <View
         style={[
           styles.panelView,
+          panelBackgroundColorStyle,
           {
             width: width,
             height: height >= 100 ? height : buttons.length > 1 ? 'auto' : 200,
           },
         ]}>
-        <View style={styles.panelButtonsMainView}>
-          {buttons.map(renderPanelButton)}
-        </View>
+        {buttons.map(renderPanelButton)}
       </View>
     );
   };

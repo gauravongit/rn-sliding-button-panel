@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import {StyleSheet} from 'react-native';
 
 const styles = StyleSheet.create({
   panelViewIOS: {
@@ -21,24 +21,21 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.8)',
     borderTopLeftRadius: 20,
     borderBottomLeftRadius: 20,
-    justifyContent: 'center',
+    justifyContent: 'space-around',
     overflow: 'hidden',
-  },
-  panelButtonsMainView: {
-    alignSelf: 'center',
   },
   panelBtnView: {
     width: '100%',
-    height: 90,
     padding: 10,
     paddingVertical: 20,
-    borderBottomColor: 'gray',
+    alignSelf: 'center',
     borderBottomWidth: 2,
     justifyContent: 'center',
   },
   panelBtnicon: {
-    width: 32,
-    height: 32,
+    width: 36,
+    height: 36,
+    alignSelf: 'center',
     resizeMode: 'contain',
   },
   openPanelBtnView: {
