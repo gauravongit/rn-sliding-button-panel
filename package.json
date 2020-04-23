@@ -1,6 +1,6 @@
 {
   "name": "rn-sliding-button-panel",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A highly customizable sliding panel for react-native with default button view and custom panel view",
   "main": "index.js",
   "scripts": {
