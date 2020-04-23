@@ -29,7 +29,7 @@ yarn add rn-sliding-button-panel
 ## Examples
 |Default View|Custom Panel Style| Custom Panel View
 |:-----:|:--------:|:----:|
-![](./src/assets/slidingPanelDemo1.gif)|![](./src/assets/slidingPanelDemo2.gif)|![](./src/assets/slidingPanelDemo3.gif)
+![](https://media.giphy.com/media/du4FsZ3KDbqKUQU9hJ/giphy.gif)|![](https://media.giphy.com/media/W1l02xWgnMrB9aXKwC/giphy.gif)|![](https://media.giphy.com/media/dYwxruBdg44VGhGJIZ/giphy.gif)
 
 "Icon made by [FreePik](https://www.flaticon.com/authors/freepik) from [www.flaticon.com](https://www.flaticon.com/)"
 ## Usage
