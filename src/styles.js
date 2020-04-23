@@ -1,35 +1,21 @@
 import {StyleSheet} from 'react-native';
 
 const styles = StyleSheet.create({
-  panelViewIOS: {
+  panelViewAnimated: {
     position: 'absolute',
-    right: 0,
-    zIndex: 1,
-    top: '50%',
-  },
-  panelViewAndroid: {
-    marginLeft: 35,
-  },
-  mainViewAndroid: {
-    position: 'absolute',
-    right: 0,
-    zIndex: 1,
-    top: '50%',
     flexDirection: 'row',
+    alignItems: 'center',
+    zIndex: 1,
   },
   panelView: {
-    backgroundColor: 'rgba(0,0,0,0.8)',
-    borderTopLeftRadius: 20,
-    borderBottomLeftRadius: 20,
+    height: '100%',
     justifyContent: 'space-around',
     overflow: 'hidden',
   },
   panelBtnView: {
     width: '100%',
-    padding: 10,
-    paddingVertical: 20,
+    flex: 1,
     alignSelf: 'center',
-    borderBottomWidth: 2,
     justifyContent: 'center',
   },
   panelBtnicon: {
@@ -38,19 +24,37 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     resizeMode: 'contain',
   },
+  openBtnIcon: {
+    width: 18,
+    height: 18,
+    resizeMode: 'contain',
+    tintColor: 'gray',
+  },
   openPanelBtnView: {
     position: 'absolute',
-    top: '50%',
-    height: 80,
-    width: 35,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    zIndex: 1,
+  },
+  panelButtonAnimatediew: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  borderStyleRight: {
+    borderTopRightRadius: 15,
+    borderBottomRightRadius: 15,
+  },
+  borderStyleLeft: {
     borderTopLeftRadius: 15,
     borderBottomLeftRadius: 15,
-    borderRightColor: 'gray',
-    borderRightWidth: 2,
-    zIndex: 2,
+  },
+  alignRight: {
+    right: 0,
+  },
+  alignLeft: {
+    left: 0,
   },
 });
 

@@ -1,190 +1,278 @@
-import React, {useState} from 'react';
-import {Animated, View, Platform, Easing, I18nManager} from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome5';
-import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
+import React, {useState, forwardRef, useImperativeHandle} from 'react';
+import {
+  Animated,
+  View,
+  Platform,
+  Easing,
+  I18nManager,
+  Image,
+  TouchableWithoutFeedback,
+} from 'react-native';
+
 import styles from './styles';
 
 const isIOS = () => Platform.OS === 'ios';
 
 const isRTL = () => I18nManager.isRTL;
-const SlideButtonPanel = ({
-  width = 70,
-  height,
-  buttons = [{}],
-  btnSeparator = true,
-  btnIconsAnimation = true,
-  panelBackgroundColor,
-  openBtnBackgroundColor,
-  btnSeparatorColor = 'gray',
-}) => {
-  const initialPosition = isRTL() ? -width : width;
-  const [position] = useState(new Animated.Value(initialPosition));
-  const [openBtnIconScale] = useState(new Animated.Value(isRTL() ? 1 : -1));
-  const [actionBtnIconSpin] = useState(new Animated.Value(1));
-  const [opened, setOpened] = useState(false);
-  const [panelOpenBtnClicked, setPanelOpenBtnClicked] = useState(false);
 
-  const onOpen = () => {
-    const toValue = opened ? -1 : 1;
-    setOpened(!opened);
-    Animated.timing(openBtnIconScale, {
-      toValue: isRTL() ? -toValue : toValue,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-  };
+const SlideButtonPanel = forwardRef(
+  (
+    {
+      width = 70,
+      height,
+      top = 150,
+      alignment = 'right',
+      slidingWidth = 0,
+      onShow = () => {},
+      onHide = () => {},
 
-  const actionBtnIconsAnimationStart = () => {
-    btnIconsAnimation &&
-      Animated.spring(actionBtnIconSpin, {
-        toValue: opened ? 1 : 0,
-        bounciness: 16,
-        speed: 3,
+      panelBackgroundColor = 'rgba(0,0,0,0.8)',
+      panelStyle = {},
+      customPanelView = null,
+
+      buttons = [{}],
+      showBtnSeparator = true,
+      btnIconsAnimation = true,
+      flipIconsInRTL = false,
+      btnSeparatorColor = 'gray',
+
+      hideOpenButton = false,
+      openBtnBackgroundColor = 'rgba(0,0,0,0.8)',
+      openButtonStyle = {},
+    },
+    ref,
+  ) => {
+    const showLeft = alignment === 'left';
+    const panelHeight = height >= 100 ? height : 300;
+    const openButtonWidth = openButtonStyle.width || 35;
+    const openButtonHeight = openButtonStyle.height || 80;
+
+    const borderRadiusStyle = showLeft
+      ? styles.borderStyleRight
+      : styles.borderStyleLeft;
+    const alignmentStyle = showLeft ? styles.alignLeft : styles.alignRight;
+    const initialPosition = isRTL()
+      ? showLeft
+        ? width
+        : -width
+      : showLeft
+      ? -width
+      : width;
+    const [position] = useState(new Animated.Value(initialPosition));
+    const [openBtnIconScale] = useState(new Animated.Value(isRTL() ? 1 : -1));
+    const [actionBtnIconSpin] = useState(new Animated.Value(1));
+    const [opened, setOpened] = useState(false);
+    const [panelOpenBtnClicked, setPanelOpenBtnClicked] = useState(false);
+
+    const onOpen = () => {
+      const toValue = opened ? -1 : 1;
+      opened
+        ? typeof onHide === 'function' && onHide()
+        : typeof onShow === 'function' && onShow();
+      setOpened(!opened);
+      Animated.timing(openBtnIconScale, {
+        toValue: isRTL() ? -toValue : toValue,
+        duration: 500,
         useNativeDriver: true,
-        easing: Easing.linear,
       }).start();
-  };
-
-  const slidePanel = () => {
-    Animated.timing(position, {
-      toValue: opened ? initialPosition : 0,
-      duration: isIOS() ? 125 : 60,
-      useNativeDriver: true,
-    }).start(onOpen);
-  };
-
-  const openPanelBtnPress = () => {
-    setPanelOpenBtnClicked(!panelOpenBtnClicked);
-    slidePanel();
-    actionBtnIconsAnimationStart();
-  };
-
-  const onStartShouldSetResponder = evt => evt.nativeEvent.touches.length === 1;
-
-  const iconSpinRotation = actionBtnIconSpin.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
-
-  const marginTopForOpenPanelBtn = isIOS()
-    ? {marginTop: -40}
-    : {marginTop: panelOpenBtnClicked ? -40 : height >= 100 ? 5 : 0};
-
-  const alignmentOpenPanelBtn = {
-    right: isIOS() ? width : panelOpenBtnClicked ? width : 0,
-  };
-
-  const openBtnBackgroundColorStyle = {backgroundColor: openBtnBackgroundColor};
-  const renderOpenPanelButton = () => {
-    const animateIconX = openBtnIconScale;
-    return (
-      <Animated.View
-        onStartShouldSetResponder={onStartShouldSetResponder}
-        onResponderRelease={openPanelBtnPress}
-        style={[
-          styles.openPanelBtnView,
-          marginTopForOpenPanelBtn,
-          alignmentOpenPanelBtn,
-          openBtnBackgroundColorStyle,
-        ]}>
-        <Animated.View style={{transform: [{scaleX: animateIconX}]}}>
-          <Icon name="play" size={12} color={'gray'} />
-        </Animated.View>
-      </Animated.View>
-    );
-  };
-
-  const renderPanelButton = (item, index) => {
-    const showBorderForButton = {
-      borderBottomWidth: btnSeparator
-        ? index === buttons.length - 1
-          ? 0
-          : 2
-        : 0,
-      borderBottomColor: btnSeparatorColor,
     };
-    const {
-      onPress = () => {},
-      uri = '',
-      iconWidth = 36,
-      iconHeight = 36,
-    } = item;
-    const dynamicHeight = {height: height > 100 ? height / buttons.length : 90};
-    const iconDimension = {width: iconWidth, height: iconHeight};
-    return (
-      <TouchableWithoutFeedback onPress={onPress}>
-        <View style={[styles.panelBtnView, showBorderForButton, dynamicHeight]}>
-          <Animated.Image
-            style={[
-              styles.panelBtnicon,
-              iconDimension,
-              {transform: [{rotate: iconSpinRotation}]},
-            ]}
-            source={{uri: uri}}
-          />
+
+    const actionBtnIconsAnimationStart = () => {
+      btnIconsAnimation &&
+        Animated.spring(actionBtnIconSpin, {
+          toValue: opened ? 1 : 0,
+          bounciness: 16,
+          speed: 3,
+          useNativeDriver: true,
+          easing: Easing.linear,
+        }).start();
+    };
+
+    const slidePanel = () => {
+      Animated.timing(position, {
+        toValue: opened
+          ? initialPosition
+          : 0 -
+            slidingWidth * (isRTL() ? (showLeft ? 1 : -1) : showLeft ? -1 : 1),
+        duration: 125,
+        useNativeDriver: true,
+      }).start(onOpen);
+    };
+
+    const openPanelBtnPress = () => {
+      setPanelOpenBtnClicked(!panelOpenBtnClicked);
+      slidePanel();
+      actionBtnIconsAnimationStart();
+    };
+
+    useImperativeHandle(ref, () => ({
+      openPanel: openPanelBtnPress,
+    }));
+
+    const onStartShouldSetResponder = evt =>
+      evt.nativeEvent.touches.length === 1;
+
+    const iconSpinRotation = actionBtnIconSpin.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', '360deg'],
+    });
+
+    const openBtnDynamicStyle = isIOS()
+      ? {
+          left: showLeft ? 'auto' : -openButtonWidth,
+          right: showLeft ? -openButtonWidth : 'auto',
+          backgroundColor: openBtnBackgroundColor,
+        }
+      : {
+          top:
+            panelOpenBtnClicked || opened
+              ? 'auto'
+              : top + panelHeight / 2 - openButtonHeight / 2,
+          position: panelOpenBtnClicked || opened ? 'relative' : 'absolute',
+          backgroundColor: openBtnBackgroundColor,
+        };
+
+    const alignPanelButton = isIOS() ? {} : alignmentStyle;
+    const openBtnBorderStyle =
+      Object.keys(openButtonStyle).length > 2 ? {} : borderRadiusStyle;
+
+    const renderOpenPanelButton = () => {
+      const animateIconX = openBtnIconScale;
+      return (
+        <Animated.View
+          onStartShouldSetResponder={onStartShouldSetResponder}
+          onResponderRelease={openPanelBtnPress}
+          style={[
+            styles.openPanelBtnView,
+            openBtnDynamicStyle,
+            openBtnBorderStyle,
+            alignPanelButton,
+            openButtonStyle,
+            {width: openButtonWidth, height: openButtonHeight},
+          ]}>
+          <Animated.View style={{transform: [{scaleX: animateIconX}]}}>
+            <Image
+              source={require('./assets/ic_play.png')}
+              style={styles.openBtnIcon}
+            />
+          </Animated.View>
+        </Animated.View>
+      );
+    };
+
+    const renderPanelButton = (item, index) => {
+      const showBorderForButton = {
+        borderBottomWidth: showBtnSeparator
+          ? index === buttons.length - 1
+            ? 0
+            : 2
+          : 0,
+        borderBottomColor: btnSeparatorColor,
+        transform: [{scaleX: isRTL() && flipIconsInRTL ? -1 : 1}],
+      };
+      const {
+        onPress = () => {},
+        uri = '',
+        requireUri,
+        iconWidth = 36,
+        iconHeight = 36,
+        buttonView = null,
+      } = item;
+
+      const iconDimension = {
+        width: iconWidth,
+        height: iconHeight,
+      };
+
+      return (
+        <TouchableWithoutFeedback onPress={onPress}>
+          <View style={[styles.panelBtnView, showBorderForButton]}>
+            <Animated.View
+              style={[
+                styles.panelButtonAnimatediew,
+                {transform: [{rotate: iconSpinRotation}]},
+              ]}>
+              {buttonView || (
+                <Animated.Image
+                  style={[styles.panelBtnicon, iconDimension]}
+                  source={requireUri ? requireUri : {uri: uri}}
+                />
+              )}
+            </Animated.View>
+          </View>
+        </TouchableWithoutFeedback>
+      );
+    };
+
+    const hiddenPanelDynamicStyle = {
+      backgroundColor: panelBackgroundColor,
+      width: width,
+      height: panelHeight,
+    };
+
+    const panelBorderStyle =
+      Object.keys(panelStyle).length > 0 ? {} : borderRadiusStyle;
+
+    const renderHiddenPanel = () => {
+      return (
+        <View
+          style={[
+            styles.panelView,
+            hiddenPanelDynamicStyle,
+            panelBorderStyle,
+            panelStyle,
+          ]}>
+          {customPanelView || buttons.map(renderPanelButton)}
         </View>
-      </TouchableWithoutFeedback>
-    );
-  };
+      );
+    };
 
-  const panelBackgroundColorStyle = {backgroundColor: panelBackgroundColor};
+    const panelViewDynamicStyle = {
+      transform: isIOS() ? [{translateX: position}] : [],
+      top,
+    };
 
-  const renderHiddenPanel = () => {
-    return (
-      <View
-        style={[
-          styles.panelView,
-          panelBackgroundColorStyle,
-          {
-            width: width,
-            height: height >= 100 ? height : buttons.length > 1 ? 'auto' : 200,
-          },
-        ]}>
-        {buttons.map(renderPanelButton)}
-      </View>
-    );
-  };
+    const renderPanelView = () => {
+      return isIOS() ? (
+        <Animated.View
+          style={[
+            styles.panelViewAnimated,
+            panelViewDynamicStyle,
+            alignmentStyle,
+          ]}>
+          {!hideOpenButton && renderOpenPanelButton()}
+          {renderHiddenPanel()}
+        </Animated.View>
+      ) : (
+        renderHiddenPanel()
+      );
+    };
 
-  const dyanmicTopMargin = () =>
-    height >= 100 ? -height / 2 + 45 : -1 * buttons.length * 45 + 45;
+    const androidPanelDynamicStyle = {
+      flexDirection: showLeft ? 'row-reverse' : 'row',
+      height: panelHeight,
+      top,
+    };
 
-  const panelViewStyle = isIOS()
-    ? styles.panelViewIOS
-    : styles.panelViewAndroid;
+    const renderPanelOnAndroid = () => {
+      return panelOpenBtnClicked || opened ? (
+        <Animated.View
+          style={[
+            styles.panelViewAnimated,
+            alignmentStyle,
+            androidPanelDynamicStyle,
+            {transform: [{translateX: position}]},
+          ]}>
+          {!hideOpenButton && renderOpenPanelButton()}
+          {renderPanelView()}
+        </Animated.View>
+      ) : (
+        !hideOpenButton && renderOpenPanelButton()
+      );
+    };
 
-  const panelViewDynamicStyle = {
-    marginTop: isIOS() ? dyanmicTopMargin() : 0,
-    transform: [{translateX: position}],
-  };
-
-  const renderPanelView = () => {
-    return (
-      <Animated.View style={[panelViewStyle, panelViewDynamicStyle]}>
-        {renderHiddenPanel()}
-        {isIOS() && renderOpenPanelButton()}
-      </Animated.View>
-    );
-  };
-
-  const renderPanelOnAndroid = () => {
-    return panelOpenBtnClicked ? (
-      <View
-        style={[
-          styles.mainViewAndroid,
-          {
-            width: width + 35,
-            marginTop: dyanmicTopMargin(),
-          },
-        ]}>
-        {renderOpenPanelButton()}
-        {renderPanelView()}
-      </View>
-    ) : (
-      renderOpenPanelButton()
-    );
-  };
-
-  return isIOS() ? renderPanelView() : renderPanelOnAndroid();
-};
+    return isIOS() ? renderPanelView() : renderPanelOnAndroid();
+  },
+);
 
 export default SlideButtonPanel;
